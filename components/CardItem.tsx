@@ -3,6 +3,7 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import type { CardData } from "./BoardCanvas";
+import { AlignLeftIcon } from "./Icons";
 
 type Props = {
   card: CardData;
@@ -42,14 +43,23 @@ export default function CardItem({ card, onOpen, overlay }: Props) {
         e.stopPropagation();
         onOpen();
       }}
-      className={`bg-white border border-slate-200 rounded-md p-2.5 text-sm text-slate-800 shadow-sm hover:border-slate-400 cursor-grab active:cursor-grabbing select-none ${
-        overlay ? "shadow-xl rotate-1" : ""
+      className={`group relative bg-white border border-slate-200/80 rounded-lg p-2.5 text-sm text-slate-800 shadow-card hover:shadow-cardHover hover:border-indigo-300 hover:-translate-y-px cursor-grab active:cursor-grabbing select-none transition ${
+        overlay ? "shadow-xl ring-2 ring-indigo-400/40 rotate-1" : ""
       }`}
     >
-      <div className="font-medium whitespace-pre-wrap break-words">{card.title}</div>
+      <div className="font-medium leading-snug whitespace-pre-wrap break-words">
+        {card.title}
+      </div>
       {card.description ? (
-        <div className="mt-1 text-xs text-slate-500 line-clamp-2 whitespace-pre-wrap break-words">
-          {card.description}
+        <div className="mt-1.5 flex items-start gap-1 text-xs text-slate-500">
+          <AlignLeftIcon
+            width={12}
+            height={12}
+            className="mt-0.5 shrink-0 text-slate-400"
+          />
+          <span className="line-clamp-2 whitespace-pre-wrap break-words">
+            {card.description}
+          </span>
         </div>
       ) : null}
     </div>

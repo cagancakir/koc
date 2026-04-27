@@ -21,6 +21,7 @@ import ColumnCard from "./ColumnCard";
 import CardItem from "./CardItem";
 import CardDetailModal from "./CardDetailModal";
 import { midpoint } from "@/lib/orderUtils";
+import { PlusIcon } from "./Icons";
 
 export type CardData = {
   id: string;
@@ -444,7 +445,7 @@ export default function BoardCanvas({ boardId, initialColumns }: Props) {
   return (
     <div className="flex-1 overflow-hidden relative">
       {error && (
-        <div className="absolute top-3 right-3 z-30 bg-red-600 text-white text-sm px-3 py-2 rounded shadow-lg">
+        <div className="absolute top-4 right-4 z-30 bg-rose-600 text-white text-sm px-4 py-2.5 rounded-lg shadow-xl shadow-rose-600/30 animate-in">
           {error}
         </div>
       )}
@@ -472,26 +473,26 @@ export default function BoardCanvas({ boardId, initialColumns }: Props) {
                 />
               ))}
             </SortableContext>
-            <div className="w-72 shrink-0">
+            <div className="w-[19rem] shrink-0">
               {addingColumn ? (
                 <form
                   onSubmit={addColumn}
-                  className="bg-white rounded-lg shadow-sm border border-slate-200 p-3 space-y-2"
+                  className="bg-white rounded-xl shadow-column ring-1 ring-slate-900/5 p-3 space-y-2 animate-in"
                 >
                   <input
                     autoFocus
                     type="text"
                     value={newColumnTitle}
                     onChange={(e) => setNewColumnTitle(e.target.value)}
-                    placeholder="Column title"
-                    className="w-full px-2 py-1.5 border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Column title…"
+                    className="w-full px-2.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent placeholder:text-slate-400"
                   />
-                  <div className="flex gap-2">
+                  <div className="flex items-center gap-2">
                     <button
                       type="submit"
-                      className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-3 py-1.5 rounded"
+                      className="bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium px-3 py-1.5 rounded-md shadow-sm shadow-indigo-500/20"
                     >
-                      Add
+                      Add column
                     </button>
                     <button
                       type="button"
@@ -499,7 +500,7 @@ export default function BoardCanvas({ boardId, initialColumns }: Props) {
                         setAddingColumn(false);
                         setNewColumnTitle("");
                       }}
-                      className="text-slate-600 hover:text-slate-900 text-sm px-2"
+                      className="text-slate-500 hover:text-slate-900 text-sm px-2 py-1.5 rounded-md hover:bg-slate-100"
                     >
                       Cancel
                     </button>
@@ -508,9 +509,10 @@ export default function BoardCanvas({ boardId, initialColumns }: Props) {
               ) : (
                 <button
                   onClick={() => setAddingColumn(true)}
-                  className="w-full text-left bg-slate-200/60 hover:bg-slate-200 rounded-lg p-3 text-slate-600 hover:text-slate-900 text-sm transition"
+                  className="w-full inline-flex items-center justify-center gap-1.5 bg-white/60 hover:bg-white border border-dashed border-slate-300 hover:border-indigo-400 hover:text-indigo-700 text-slate-600 text-sm font-medium rounded-xl py-3 transition"
                 >
-                  + Add column
+                  <PlusIcon width={14} height={14} />
+                  <span>Add column</span>
                 </button>
               )}
             </div>
@@ -520,8 +522,10 @@ export default function BoardCanvas({ boardId, initialColumns }: Props) {
           {activeCard ? (
             <CardItem card={activeCard} overlay onOpen={() => {}} />
           ) : activeColumn ? (
-            <div className="w-72 bg-slate-100 rounded-lg shadow-xl border border-slate-300 p-3 opacity-90">
-              <div className="font-semibold text-slate-800">{activeColumn.title}</div>
+            <div className="w-[19rem] bg-white rounded-xl shadow-2xl ring-1 ring-indigo-300/60 p-3 rotate-1">
+              <div className="text-sm font-semibold text-slate-800">
+                {activeColumn.title}
+              </div>
               <div className="text-xs text-slate-500 mt-1">
                 {activeColumn.cards.length}{" "}
                 {activeColumn.cards.length === 1 ? "card" : "cards"}

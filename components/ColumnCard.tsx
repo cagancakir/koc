@@ -1,10 +1,15 @@
 "use client";
 
-import { useSortable, SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
+import {
+  useSortable,
+  SortableContext,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { FormEvent, useMemo, useState } from "react";
 import CardItem from "./CardItem";
 import type { ColumnData } from "./BoardCanvas";
+import { PlusIcon, TrashIcon, GripIcon } from "./Icons";
 
 type Props = {
   column: ColumnData;
@@ -66,13 +71,18 @@ export default function ColumnCard({
     <div
       ref={setNodeRef}
       style={style}
-      className="w-72 shrink-0 bg-slate-100 rounded-lg shadow-sm border border-slate-200 flex flex-col max-h-[calc(100vh-9rem)]"
+      className="group/col w-[19rem] shrink-0 bg-slate-50/80 backdrop-blur-sm rounded-xl shadow-column ring-1 ring-slate-900/5 flex flex-col max-h-[calc(100vh-7rem)]"
     >
       <div
-        className="flex items-center justify-between gap-2 px-3 py-2 border-b border-slate-200 cursor-grab active:cursor-grabbing"
+        className="flex items-center gap-1.5 px-3 py-2.5 border-b border-slate-200/70 cursor-grab active:cursor-grabbing select-none"
         {...attributes}
         {...listeners}
       >
+        <GripIcon
+          width={14}
+          height={14}
+          className="text-slate-300 group-hover/col:text-slate-500 transition shrink-0"
+        />
         {editingTitle ? (
           <input
             autoFocus
@@ -87,7 +97,7 @@ export default function ColumnCard({
               }
             }}
             onPointerDown={(e) => e.stopPropagation()}
-            className="flex-1 px-2 py-1 text-sm font-semibold border border-slate-300 rounded bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="flex-1 px-2 py-1 text-sm font-semibold border border-indigo-300 rounded bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
           />
         ) : (
           <button
@@ -96,18 +106,21 @@ export default function ColumnCard({
               setTitleDraft(column.title);
               setEditingTitle(true);
             }}
-            className="flex-1 text-left text-sm font-semibold text-slate-800 truncate"
+            className="flex-1 text-left text-sm font-semibold text-slate-800 truncate hover:text-indigo-700 transition"
           >
             {column.title}
           </button>
         )}
+        <span className="text-[11px] font-medium text-slate-500 bg-slate-200/70 rounded-full px-2 py-0.5 shrink-0 tabular-nums">
+          {column.cards.length}
+        </span>
         <button
           onPointerDown={(e) => e.stopPropagation()}
           onClick={onDelete}
-          className="text-slate-400 hover:text-red-600 text-sm px-1"
+          className="text-slate-400 hover:text-rose-600 hover:bg-rose-50 p-1 rounded opacity-0 group-hover/col:opacity-100 transition"
           aria-label="Delete column"
         >
-          ✕
+          <TrashIcon width={14} height={14} />
         </button>
       </div>
       <div className="flex-1 overflow-y-auto px-2 py-2 space-y-2 scrollbar-thin">
@@ -121,12 +134,14 @@ export default function ColumnCard({
           ))}
         </SortableContext>
         {column.cards.length === 0 && !adding && (
-          <div className="text-xs text-slate-400 text-center py-4">No cards</div>
+          <div className="text-xs text-slate-400 text-center py-6 select-none">
+            Drag cards here
+          </div>
         )}
       </div>
-      <div className="p-2 border-t border-slate-200">
+      <div className="p-2 border-t border-slate-200/70">
         {adding ? (
-          <form onSubmit={submitAddCard} className="space-y-2">
+          <form onSubmit={submitAddCard} className="space-y-2 animate-in">
             <textarea
               autoFocus
               value={newTitle}
@@ -141,16 +156,16 @@ export default function ColumnCard({
                   setNewTitle("");
                 }
               }}
-              placeholder="Card title"
+              placeholder="Card title…"
               rows={2}
-              className="w-full px-2 py-1.5 text-sm border border-slate-300 rounded resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-2.5 py-2 text-sm bg-white border border-slate-200 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent placeholder:text-slate-400"
             />
-            <div className="flex gap-2">
+            <div className="flex items-center gap-2">
               <button
                 type="submit"
-                className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-3 py-1 rounded"
+                className="bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium px-3 py-1.5 rounded-md shadow-sm shadow-indigo-500/20"
               >
-                Add
+                Add card
               </button>
               <button
                 type="button"
@@ -158,7 +173,7 @@ export default function ColumnCard({
                   setAdding(false);
                   setNewTitle("");
                 }}
-                className="text-slate-600 hover:text-slate-900 text-sm px-2"
+                className="text-slate-500 hover:text-slate-900 text-sm px-2 py-1.5 rounded-md hover:bg-slate-200/70"
               >
                 Cancel
               </button>
@@ -167,9 +182,10 @@ export default function ColumnCard({
         ) : (
           <button
             onClick={() => setAdding(true)}
-            className="w-full text-left text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-200/70 px-2 py-1.5 rounded"
+            className="w-full inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-900 hover:bg-slate-200/70 px-2.5 py-1.5 rounded-md transition"
           >
-            + Add card
+            <PlusIcon width={14} height={14} />
+            <span>Add card</span>
           </button>
         )}
       </div>

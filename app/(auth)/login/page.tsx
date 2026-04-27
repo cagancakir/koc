@@ -1,12 +1,15 @@
 "use client";
 
 import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { FormEvent, useState } from "react";
+import { FormEvent, Suspense, useState } from "react";
+import { LayersIcon } from "@/components/Icons";
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
+  const params = useSearchParams();
+  const justRegistered = params.get("registered") === "1";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -31,51 +34,78 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <form
-        onSubmit={onSubmit}
-        className="w-full max-w-sm bg-white rounded-lg shadow-md p-8 space-y-4"
-      >
-        <h1 className="text-2xl font-bold text-slate-900">Sign in to TaskFlow</h1>
-        {error && (
-          <div className="text-sm bg-red-50 text-red-700 border border-red-200 rounded px-3 py-2">
-            {error}
-          </div>
-        )}
-        <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
+    <form
+      onSubmit={onSubmit}
+      className="w-full max-w-sm bg-white/90 glass rounded-2xl shadow-xl ring-1 ring-slate-900/5 p-8 space-y-5 animate-in"
+    >
+      <div className="flex flex-col items-center text-center space-y-2">
+        <div className="size-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 text-white grid place-items-center shadow-lg shadow-indigo-500/30">
+          <LayersIcon width={22} height={22} />
+        </div>
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Welcome back</h1>
+        <p className="text-sm text-slate-500">Sign in to continue to TaskFlow</p>
+      </div>
+
+      {justRegistered && (
+        <div className="text-sm bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-lg px-3 py-2">
+          Account created. Sign in below.
+        </div>
+      )}
+      {error && (
+        <div className="text-sm bg-rose-50 text-rose-700 border border-rose-200 rounded-lg px-3 py-2">
+          {error}
+        </div>
+      )}
+
+      <div className="space-y-3">
+        <label className="block">
+          <span className="block text-xs font-medium text-slate-700 mb-1.5">Email</span>
           <input
             type="email"
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-3 py-2 border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="you@example.com"
+            className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-lg text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
           />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">Password</label>
+        </label>
+        <label className="block">
+          <span className="block text-xs font-medium text-slate-700 mb-1.5">Password</span>
           <input
             type="password"
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-3 py-2 border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="••••••••"
+            className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-lg text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
           />
-        </div>
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white font-medium py-2 rounded transition"
-        >
-          {loading ? "Signing in..." : "Sign in"}
-        </button>
-        <p className="text-sm text-slate-600 text-center">
-          No account?{" "}
-          <Link href="/register" className="text-blue-600 hover:underline">
-            Register
-          </Link>
-        </p>
-      </form>
+        </label>
+      </div>
+
+      <button
+        type="submit"
+        disabled={loading}
+        className="w-full bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 disabled:opacity-60 disabled:cursor-not-allowed text-white font-medium py-2.5 rounded-lg shadow-md shadow-indigo-500/20 transition"
+      >
+        {loading ? "Signing in..." : "Sign in"}
+      </button>
+
+      <p className="text-sm text-slate-600 text-center">
+        No account?{" "}
+        <Link href="/register" className="text-indigo-600 hover:text-indigo-700 font-medium">
+          Create one
+        </Link>
+      </p>
+    </form>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <div className="min-h-screen flex items-center justify-center p-4">
+      <Suspense fallback={null}>
+        <LoginForm />
+      </Suspense>
     </div>
   );
 }
