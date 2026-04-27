@@ -1,36 +1,88 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# TaskFlow
 
-## Getting Started
+Trello-style Kanban board: register, log in, create boards with columns and cards, drag cards across columns, changes persist in Postgres.
 
-First, run the development server:
+## Stack
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- Next.js 14 (App Router) + TypeScript + Tailwind
+- PostgreSQL + Prisma
+- NextAuth.js (credentials, JWT sessions)
+- `@dnd-kit/core` + `@dnd-kit/sortable` for drag and drop
+
+## Local setup
+
+1. Install dependencies:
+
+   ```bash
+   npm install
+   ```
+
+2. Make sure Postgres is running and create a database:
+
+   ```bash
+   createdb taskflow
+   ```
+
+3. Copy `.env.example` to `.env` and fill in:
+
+   ```bash
+   cp .env.example .env
+   # generate NEXTAUTH_SECRET with: openssl rand -base64 32
+   ```
+
+4. Run the initial migration:
+
+   ```bash
+   npx prisma migrate dev
+   ```
+
+5. Start the dev server:
+
+   ```bash
+   npm run dev
+   ```
+
+   App runs at http://localhost:3000 — register a user, then create a board.
+
+## Project layout
+
+```
+app/
+  (auth)/login, (auth)/register   credentials forms
+  boards/                         list of boards
+  boards/[id]/                    Kanban view
+  api/                            REST routes (auth, register, boards, columns, cards)
+components/
+  BoardCanvas.tsx                 dnd-kit context, optimistic state, all CRUD callbacks
+  ColumnCard.tsx                  sortable column with sortable card list inside
+  CardItem.tsx                    sortable card
+  CardDetailModal.tsx             edit title/description, delete card
+lib/
+  prisma.ts                       Prisma client singleton
+  auth.ts                         NextAuth credentials config
+  session.ts                      getCurrentUserId() helper
+  orderUtils.ts                   midpoint() for fractional ordering
+middleware.ts                     protects /boards/* via withAuth
+prisma/schema.prisma              User / Board / Column / Card
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Ordering strategy
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Columns and cards each carry a `Float order`. New items are inserted at the midpoint of neighbors:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- between `a` and `b` → `(a + b) / 2`
+- before first → `firstOrder / 2`
+- after last → `lastOrder + 1`
 
-## Learn More
+When the gap shrinks below `0.001`, `lib/orderUtils.ts` exposes `rebalancedOrders(count)` to renumber as `1, 2, 3...` (not auto-triggered yet).
 
-To learn more about Next.js, take a look at the following resources:
+## Deploying to Vercel
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. Push this repo to GitHub.
+2. Provision Postgres (Neon, Supabase, or Vercel Postgres).
+3. In Vercel: import the repo, set env vars:
+   - `DATABASE_URL` — connection string from your Postgres host (use the pooled URL for the app; the direct URL is needed for migrations)
+   - `NEXTAUTH_SECRET` — `openssl rand -base64 32`
+   - `NEXTAUTH_URL` — `https://your-app.vercel.app`
+4. Run migrations against the prod DB once: `DATABASE_URL=... npx prisma migrate deploy`. (Or change Vercel's build command to `prisma migrate deploy && next build`.)
+5. Deploy.
