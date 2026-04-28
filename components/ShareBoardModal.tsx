@@ -125,7 +125,7 @@ export default function ShareBoardModal({
                         <select
                           value={m.role}
                           onChange={(e) =>
-                            onChangeRole(m.memberId!, e.target.value as any)
+                            onChangeRole(m.memberId!, e.target.value as "EDITOR" | "VIEWER")
                           }
                           className="px-2 py-1.5 text-xs font-medium bg-white border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
                         >
