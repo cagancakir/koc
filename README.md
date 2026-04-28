@@ -2,6 +2,28 @@
 
 Trello-style Kanban board: register, log in, create boards with columns and cards, drag cards across columns, changes persist in Postgres.
 
+## Technical Report / Submission Highlights
+
+This project implements a flawless, highly performant core drag-and-drop experience. Below are the key architectural and technical decisions made to ensure scalability, performance, and best-in-class UX:
+
+### 1. Drag-and-Drop Library Selection: `@dnd-kit`
+Instead of using native HTML5 drag-and-drop or `react-beautiful-dnd`, I opted for **`@dnd-kit/core`** and **`@dnd-kit/sortable`**. 
+* **Why?** It is modern, highly modular, natively supports accessible keyboard inputs, and its lightweight `PointerSensor` seamlessly handles both mouse and basic touch events on mobile devices without conflicting with scroll behaviors.
+
+### 2. The Ordering Algorithm: O(1) Fractional Ordering
+A critical challenge in Kanban boards is persisting item order after a drag event. Instead of assigning integer indices (1, 2, 3...) which requires an aggressive `O(N)` database update query, I implemented a **Fractional Ordering (Midpoint)** strategy.
+* **How it works:** Both columns and cards have a `Float` type `order` column. When a card is dropped between card A and card B, the system simply assigns the new card an order of `(A.order + B.order) / 2`.
+* **The Result:** Moving a card only requires updating a **single row** in the database. This guarantees `O(1)` time complexity and zero performance degradation even if a column has 10,000 cards.
+
+### 3. Optimistic UI Updates for Fluid Performance
+Kanban boards must feel instantly responsive. To achieve this, I utilized **Optimistic State Management**. When a user drops a card into a new column, the React state immediately updates the UI without waiting for the server response. The API `PATCH` request happens asynchronously in the background.
+
+### 4. Architecture & Cache Management
+The application is built on **Next.js 14 (App Router)** with **Prisma ORM** and **Supabase (PostgreSQL)**.
+* **Router Cache Safety**: Modern Next.js aggressively caches client-side navigations (Router Cache). To prevent the "stale board list" bug when navigating back from a Kanban canvas, I explicitly trigger `router.refresh()` upon board creation/deletion. This ensures the user data is always synced with the database while preserving the blazing-fast SPA navigational feel.
+
+---
+
 ## Stack
 
 - Next.js 14 (App Router) + TypeScript + Tailwind
