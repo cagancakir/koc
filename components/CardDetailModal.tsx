@@ -9,7 +9,6 @@ import {
   UserIcon,
   TagIcon,
   CalendarIcon,
-  LABEL_COLOR_KEYS,
   LABEL_COLOR_CLASSES,
   type LabelColorKey,
   initials,
@@ -41,8 +40,6 @@ export default function CardDetailModal({
   onClose,
   onSave,
   onDelete,
-  onCreateLabel,
-  onDeleteLabel,
 }: Props) {
   const [title, setTitle] = useState(card.title);
   const [description, setDescription] = useState(card.description ?? "");

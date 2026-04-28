@@ -6,7 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { getBoardRole, canView } from "@/lib/access";
 import BoardCanvas from "@/components/BoardCanvas";
 import SignOutButton from "@/components/SignOutButton";
-import { ChevronLeftIcon, LayersIcon } from "@/components/Icons";
+import { ChevronLeftIcon, LayersIcon, type LabelColorKey } from "@/components/Icons";
 
 export const dynamic = "force-dynamic";
 
@@ -89,7 +89,7 @@ export default async function BoardPage({ params }: { params: { id: string } }) 
         initialLabels={board.labels.map((l) => ({
           id: l.id,
           name: l.name,
-          color: l.color as any,
+          color: l.color as LabelColorKey,
         }))}
         initialMembers={initialMembers}
         initialColumns={board.columns.map((c) => ({
@@ -109,7 +109,7 @@ export default async function BoardPage({ params }: { params: { id: string } }) 
             labels: card.labels.map((l) => ({
               id: l.id,
               name: l.name,
-              color: l.color as any,
+              color: l.color as LabelColorKey,
             })),
           })),
         }))}
