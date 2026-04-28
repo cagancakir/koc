@@ -6,17 +6,22 @@ Trello-style Kanban board: register, log in, create boards with columns and card
 
 This project implements a flawless, highly performant core drag-and-drop experience. Below are the key architectural and technical decisions made to ensure scalability, performance, and best-in-class UX:
 
-### 1. Drag-and-Drop Library Selection: `@dnd-kit`
-Instead of using native HTML5 drag-and-drop or `react-beautiful-dnd`, I opted for **`@dnd-kit/core`** and **`@dnd-kit/sortable`**. 
-* **Why?** It is modern, highly modular, natively supports accessible keyboard inputs, and its lightweight `PointerSensor` seamlessly handles both mouse and basic touch events on mobile devices without conflicting with scroll behaviors.
+### 1. Drag-and-Drop Library Selection (`@dnd-kit`) & Mobile Usability
+Instead of using native HTML5 drag-and-drop (limited formatting) or `react-beautiful-dnd` (no longer maintained), I opted for **`@dnd-kit/core`** and **`@dnd-kit/sortable`**. 
+* **Why?** It is modern, modular, natively supports accessible keyboard inputs, and its lightweight `PointerSensor` seamlessly handles both mouse clicks and touch events on mobile devices (e.g., dragging without conflicting with vertical native scrolling).
 
-### 2. The Ordering Algorithm: O(1) Fractional Ordering
-A critical challenge in Kanban boards is persisting item order after a drag event. Instead of assigning integer indices (1, 2, 3...) which requires an aggressive `O(N)` database update query, I implemented a **Fractional Ordering (Midpoint)** strategy.
+### 2. The Ordering Algorithm: Persisting Order Robustly
+A critical challenge in Kanban boards is persisting item order natively after a page refresh. Instead of assigning integer indices (1, 2, 3...) which requires an aggressive `O(N)` database update query, I implemented a **Fractional Ordering (Midpoint)** strategy.
 * **How it works:** Both columns and cards have a `Float` type `order` column. When a card is dropped between card A and card B, the system simply assigns the new card an order of `(A.order + B.order) / 2`.
-* **The Result:** Moving a card only requires updating a **single row** in the database. This guarantees `O(1)` time complexity and zero performance degradation even if a column has 10,000 cards.
+* **The Result:** Moving a card only requires updating a **single row** in the database. This guarantees `O(1)` time complexity and fluid performance even if a column has 10,000 cards. Note: This same logic applies to columns; **columns are also fully draggable and re-orderable**.
 
 ### 3. Optimistic UI Updates for Fluid Performance
-Kanban boards must feel instantly responsive. To achieve this, I utilized **Optimistic State Management**. When a user drops a card into a new column, the React state immediately updates the UI without waiting for the server response. The API `PATCH` request happens asynchronously in the background.
+Kanban boards must feel instantly responsive, especially under heavy card loads. To achieve this, I utilized **Optimistic State Management**. When a user drops a card into a new column, the React state immediately updates the UI without waiting for the server response. The API `PATCH` request happens asynchronously in the background.
+
+### 4. Feature Prioritization (48-Hour Scope)
+Given the tight 48-hour time constraint, I applied strict scoping to ensure a production-ready core rather than delivering half-finished peripheral features:
+* **Excluded:** Board sharing/multiplayer, Activity history logs, and granular card metadata (tags, due dates, assignees) were purposely left out.
+* **Included:** I focused 100% on the core mechanics: flawless drag-and-drop UX, visual drop cues, complex data relational integrity (User → Board → Column → Card), bulletproof cache validation, and a seamless cloud deployment on Vercel/Supabase.
 
 ### 4. Architecture & Cache Management
 The application is built on **Next.js 14 (App Router)** with **Prisma ORM** and **Supabase (PostgreSQL)**.
