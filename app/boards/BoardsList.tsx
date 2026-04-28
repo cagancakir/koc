@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 import { PlusIcon, TrashIcon, pickAccent } from "@/components/Icons";
 
@@ -11,6 +12,7 @@ export default function BoardsList({ initial }: { initial: Board[] }) {
   const [title, setTitle] = useState("");
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   async function createBoard(e: FormEvent) {
     e.preventDefault();
@@ -30,6 +32,7 @@ export default function BoardsList({ initial }: { initial: Board[] }) {
     const board: Board = await res.json();
     setBoards((prev) => [board, ...prev]);
     setTitle("");
+    router.refresh();
   }
 
   async function deleteBoard(id: string) {
@@ -40,6 +43,8 @@ export default function BoardsList({ initial }: { initial: Board[] }) {
     if (!res.ok) {
       setBoards(prev);
       setError("Could not delete board");
+    } else {
+      router.refresh();
     }
   }
 
