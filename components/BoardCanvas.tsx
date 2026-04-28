@@ -6,7 +6,9 @@ import {
   DragOverEvent,
   DragOverlay,
   DragStartEvent,
-  PointerSensor,
+  KeyboardSensor,
+  MouseSensor,
+  TouchSensor,
   closestCorners,
   useSensor,
   useSensors,
@@ -15,6 +17,7 @@ import {
   SortableContext,
   arrayMove,
   horizontalListSortingStrategy,
+  sortableKeyboardCoordinates,
 } from "@dnd-kit/sortable";
 import { FormEvent, useMemo, useRef, useState } from "react";
 import ColumnCard from "./ColumnCard";
@@ -54,8 +57,18 @@ export default function BoardCanvas({ boardId, initialColumns }: Props) {
   const [addingColumn, setAddingColumn] = useState(false);
   const [newColumnTitle, setNewColumnTitle] = useState("");
 
+  // Sensor strategy:
+  // - MouseSensor: small distance threshold so clicks don't trigger drag.
+  // - TouchSensor: 200ms long-press so vertical scroll on mobile isn't hijacked.
+  // - KeyboardSensor: keyboard accessibility (Space to pick up, arrows to move).
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(MouseSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(TouchSensor, {
+      activationConstraint: { delay: 200, tolerance: 6 },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
   );
 
   const columnIds = useMemo(() => columns.map((c) => c.id), [columns]);
